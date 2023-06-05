@@ -1,0 +1,42 @@
+<html>
+  <head>
+    <link rel="stylesheet" href="https://pyscript.net/latest/pyscript.css" />
+        
+    <script defer src="https://pyscript.net/latest/pyscript.js"></script>
+    
+    <py-config>
+        packages = ["pandas"]
+    </py-config>
+  </head>
+  <body>
+    <input type="file" id="fileinput" accept=".csv, .xlsx"/>
+
+    <script>
+        var test = "test";
+
+        function assignFile(e) {
+            // Assign file to js variable
+            window.file = e.target.files[0];
+            console.log("File assigned")
+        }
+    </script>
+
+    <py-script>
+import pandas as pd
+import pyodide
+import io
+import js
+
+async def get_file(e):
+    files = e.target.files.to_py()
+    for file in files:
+      file_content = await file.text()
+      df = pd.read_csv(io.StringIO(file_content))
+      js.console.log(df)
+
+get_file_proxy = pyodide.ffi.create_proxy(get_file)
+
+js.document.getElementById("fileinput").addEventListener("change", get_file_proxy)
+    </py-script>
+  </body>
+</html>
